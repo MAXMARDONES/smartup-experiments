@@ -1,257 +1,172 @@
-# Dev Availability Calendar
+# Dev Availability Calendar - SmartUp
 
-An interactive web-based calendar for tracking developer availability within the SmartUp team. This tool helps team members visualize and manage their available time slots throughout the week.
+A modern booking system for clients to schedule meetings with Daniel Sateler.
 
 ## Features
 
-- Interactive Calendar Interface: Visual weekly calendar with clickable time slots
-- Multiple Developers: Support for tracking multiple team members
-- Timezone Aware: All times displayed in Chile Time (CLT - America/Santiago)
-- Persistent Storage: Changes are saved to a JSON file
-- Real-time Updates: Changes reflect immediately in the interface
-- Team Sharing: Use ngrok to share your calendar with the team
+- **Single-User Booking System**: Clients can book available time slots with Daniel Sateler
+- **Structured Time Slots**:
+  - Morning: 10:30 - 12:30 (30-minute blocks)
+  - Afternoon: 14:00 - 18:30 (1-hour blocks)
+- **Real-time Availability**: See which slots are available or already booked
+- **Easy Booking**: Click a slot, enter your name, and confirm
+- **Cancel Bookings**: Click on a booked slot to cancel it
+- **Mobile Responsive**: Works perfectly on all devices
+- **SmartUp Branding**: Professional look with SmartUp colors and logo
 
-## Pre-configured Availability
+## Security Features
 
-The calendar comes pre-populated with Daniel's availability:
-- **Monday - Friday**:
-  - Morning: 10:30 - 12:30
-  - Afternoon: 14:00 - 18:30
-- **Timezone**: America/Santiago (Chile Time)
+- Input sanitization to prevent XSS attacks
+- Name validation (2-100 characters)
+- Rate limiting (100 requests per 15 minutes)
+- Atomic file operations to prevent race conditions
+- Safe character filtering for client names
 
-## Quick Start
+## Installation
 
-### Prerequisites
-
-- Node.js (v16 or higher)
-- npm (comes with Node.js)
-
-### Installation
-
-1. Clone the repository:
-```bash
-git clone https://github.com/MAXMARDONES/smartup-experiments.git
-cd smartup-experiments
-```
-
-2. Install dependencies:
+1. Install dependencies:
 ```bash
 npm install
 ```
 
-### Running Locally
-
-1. Start the server:
+2. Start the server:
 ```bash
 npm start
 ```
 
-2. Open your browser and navigate to:
-```
-http://localhost:3000
-```
-
-### Development Mode
-
-For auto-reload during development:
+For development with auto-reload:
 ```bash
 npm run dev
 ```
 
-## Sharing with the Team (ngrok)
-
-### Setup ngrok
-
-1. Download ngrok from [ngrok.com](https://ngrok.com)
-2. Sign up for a free account and get your auth token
-3. Install ngrok:
-```bash
-# macOS
-brew install ngrok
-
-# Linux
-sudo snap install ngrok
-
-# Or download from ngrok.com
-```
-
-4. Authenticate ngrok:
-```bash
-ngrok config add-authtoken YOUR_AUTH_TOKEN
-```
-
-### Share Your Calendar
-
-1. Start the local server:
-```bash
-npm start
-```
-
-2. In a new terminal, run the ngrok script:
-```bash
-npm run ngrok
-```
-
-Or manually:
-```bash
-ngrok http 3000
-```
-
-3. Share the public URL (e.g., `https://abc123.ngrok.io`) with your team
-
-## Usage Guide
-
-### Viewing Availability
-
-1. Select a developer from the dropdown menu
-2. View their weekly availability across all days
-3. Green slots indicate available time periods
-4. Gray slots indicate unavailable periods
-
-### Updating Availability
-
-1. Select your name from the developer dropdown
-2. Click on time slots to toggle availability (green = available, gray = unavailable)
-3. Click "Save Changes" to persist your updates
-4. Changes are saved to `data/availability.json`
-
-### Adding New Developers
-
-1. Click the "+ Add Developer" button
-2. Enter the developer's name
-3. Start marking their availability
-4. Save changes
-
-## Project Structure
-
-```
-dev-availability-calendar/
-├── server.js              # Express backend server
-├── package.json           # Node.js dependencies
-├── data/
-│   └── availability.json  # Availability data storage
-├── public/
-│   ├── index.html        # Main HTML page
-│   ├── styles.css        # Styling
-│   └── app.js            # Frontend JavaScript
-├── scripts/
-│   └── start-ngrok.sh    # ngrok startup script
-└── README.md             # This file
-```
+3. Open your browser to `http://localhost:3000`
 
 ## API Endpoints
 
 ### GET /api/availability
-Fetch current availability data for all developers.
+Get all bookings and availability data.
 
 **Response:**
 ```json
 {
-  "developers": [
+  "developer": "Daniel Sateler",
+  "slots": [
     {
-      "id": "daniel",
-      "name": "Daniel",
-      "availability": [...]
+      "date": "2026-01-15",
+      "time": "10:30",
+      "booked": true,
+      "clientName": "John Doe",
+      "bookedAt": "2026-01-13T17:30:00.000Z"
     }
-  ],
-  "timezone": "America/Santiago"
+  ]
 }
 ```
 
-### POST /api/availability
-Update availability data.
+### POST /api/book
+Book a time slot.
 
-**Request Body:**
+**Request:**
 ```json
 {
-  "developers": [...],
-  "timezone": "America/Santiago"
+  "date": "2026-01-15",
+  "time": "14:00",
+  "clientName": "Jane Smith"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Time slot booked successfully",
+  "slot": {
+    "date": "2026-01-15",
+    "time": "14:00",
+    "clientName": "Jane Smith"
+  }
+}
+```
+
+### POST /api/cancel
+Cancel a booking.
+
+**Request:**
+```json
+{
+  "date": "2026-01-15",
+  "time": "14:00"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Booking cancelled successfully"
 }
 ```
 
 ### GET /health
 Health check endpoint.
 
+**Response:**
+```json
+{
+  "status": "ok",
+  "developer": "Daniel Sateler"
+}
+```
+
+## Data Storage
+
+Bookings are stored in `data/availability.json`. The file is created automatically on first use.
+
+**Structure:**
+```json
+{
+  "developer": "Daniel Sateler",
+  "slots": []
+}
+```
+
+## Available Time Slots
+
+- **Morning Session**: 10:30, 11:00, 11:30, 12:00, 12:30 (30-minute blocks)
+- **Afternoon Session**: 14:00, 15:00, 16:00, 17:00, 18:00 (1-hour blocks)
+
+## Technology Stack
+
+- **Backend**: Node.js + Express
+- **Frontend**: Vanilla JavaScript (no frameworks)
+- **Styling**: Custom CSS with CSS Variables
+- **Data Storage**: JSON file (simple and portable)
+- **Security**: express-rate-limit, input sanitization
+
 ## Configuration
 
-### Port Configuration
+- **Port**: Set via `PORT` environment variable (default: 3000)
+- **Rate Limit**: 100 requests per 15 minutes per IP
+- **Data File**: `data/availability.json`
 
-The server runs on port 3000 by default. To change it:
-```bash
-PORT=8080 npm start
-```
+## Development
 
-### Timezone
+The application uses atomic file operations to prevent race conditions when multiple clients try to book the same slot simultaneously. All inputs are sanitized and validated before processing.
 
-The default timezone is set to `America/Santiago` (Chile Time). This can be modified in `data/availability.json`:
-```json
-{
-  "timezone": "America/Santiago"
-}
-```
+## Future Enhancements
 
-## Data Format
-
-Availability data is stored in JSON format:
-
-```json
-{
-  "developers": [
-    {
-      "id": "developer-id",
-      "name": "Developer Name",
-      "availability": [
-        {
-          "dayOfWeek": 1,
-          "slots": [
-            {
-              "start": "10:30",
-              "end": "12:30"
-            }
-          ]
-        }
-      ]
-    }
-  ],
-  "timezone": "America/Santiago"
-}
-```
-
-**Day of Week:** 1 = Monday, 2 = Tuesday, ..., 7 = Sunday
-
-## Troubleshooting
-
-### Server won't start
-- Check if port 3000 is already in use
-- Ensure Node.js is installed: `node --version`
-- Try reinstalling dependencies: `rm -rf node_modules && npm install`
-
-### Changes not saving
-- Check file permissions on `data/availability.json`
-- Ensure the `data/` directory exists
-- Check server logs for errors
-
-### ngrok connection issues
-- Verify ngrok is authenticated: `ngrok config check`
-- Ensure local server is running before starting ngrok
-- Check firewall settings
-
-## Contributing
-
-This is an experimental project for the SmartUp team. Feel free to:
-- Add new features
-- Improve the UI
-- Fix bugs
-- Enhance documentation
+Possible improvements for future versions:
+- Database integration (PostgreSQL/MongoDB)
+- User authentication for Daniel
+- Email notifications for new bookings
+- Calendar integration (Google Calendar, Outlook)
+- Booking reminders
+- Time zone support for international clients
+- Analytics dashboard
 
 ## License
 
-MIT License - See LICENSE file for details
+MIT
 
-## Support
+## Author
 
-For issues or questions, contact the SmartUp development team.
-
----
-
-**Made with love by the SmartUp Team**
+SmartUp - 2026
