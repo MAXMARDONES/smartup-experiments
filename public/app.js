@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeWeek();
     loadAvailability();
     setupEventListeners();
+    setupMetaGuide();
 });
 
 // Set up event listeners
@@ -384,4 +385,27 @@ function sanitizeHTML(str) {
     const div = document.createElement('div');
     div.textContent = str;
     return div.innerHTML;
+}
+
+// Setup meta-guide accordion
+function setupMetaGuide() {
+    const metaToggle = document.querySelector('.meta-toggle');
+    const metaContent = document.querySelector('.meta-content');
+    const toggleIcon = document.querySelector('.toggle-icon');
+
+    if (!metaToggle || !metaContent) return;
+
+    metaToggle.addEventListener('click', () => {
+        const isExpanded = metaToggle.getAttribute('aria-expanded') === 'true';
+
+        if (isExpanded) {
+            metaToggle.setAttribute('aria-expanded', 'false');
+            metaContent.setAttribute('hidden', '');
+            toggleIcon.textContent = '▼';
+        } else {
+            metaToggle.setAttribute('aria-expanded', 'true');
+            metaContent.removeAttribute('hidden');
+            toggleIcon.textContent = '▲';
+        }
+    });
 }
