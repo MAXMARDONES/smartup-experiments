@@ -20,14 +20,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Set up event listeners
 function setupEventListeners() {
-    document.getElementById('prevWeek').addEventListener('click', () => {
-        changeWeek(-1);
-    });
-
-    document.getElementById('nextWeek').addEventListener('click', () => {
-        changeWeek(1);
-    });
-
     // Booking modal
     const bookingModal = document.getElementById('bookingModal');
     const closeBooking = bookingModal.querySelector('.close');
@@ -88,20 +80,15 @@ function initializeWeek() {
     updateWeekDisplay();
 }
 
-// Change week
-function changeWeek(direction) {
-    currentWeekStart.setDate(currentWeekStart.getDate() + (direction * 7));
-    updateWeekDisplay();
-    renderCalendar();
-}
-
 // Update week display
 function updateWeekDisplay() {
+    const weekStart = new Date(currentWeekStart);
+    weekStart.setDate(currentWeekStart.getDate() + 1); // Tuesday
     const weekEnd = new Date(currentWeekStart);
     weekEnd.setDate(currentWeekStart.getDate() + 4); // Friday
 
     const options = { month: 'long', day: 'numeric', year: 'numeric' };
-    const startStr = currentWeekStart.toLocaleDateString('es-CL', options);
+    const startStr = weekStart.toLocaleDateString('es-CL', options);
     const endStr = weekEnd.toLocaleDateString('es-CL', options);
 
     document.getElementById('weekDisplay').textContent = `${startStr} - ${endStr}`;
@@ -127,8 +114,8 @@ function renderCalendar() {
     const calendar = document.getElementById('calendar');
     calendar.innerHTML = '';
 
-    // Generate 5 days (Monday to Friday)
-    for (let i = 0; i < 5; i++) {
+    // Generate 4 days (Tuesday to Friday)
+    for (let i = 1; i < 5; i++) {
         const date = new Date(currentWeekStart);
         date.setDate(currentWeekStart.getDate() + i);
 
